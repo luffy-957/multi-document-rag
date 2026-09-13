@@ -5,8 +5,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 class PDFProcessor:
-
-    #Handles PDF loading and text chunking.
+    """
+    Handles PDF loading and text chunking.
+    """
 
     def __init__(
         self,
@@ -52,6 +53,7 @@ class PDFProcessor:
         Split loaded documents into smaller chunks
         while preserving source metadata.
         """
+
         chunks = self.text_splitter.split_documents(
             documents
         )
@@ -60,15 +62,23 @@ class PDFProcessor:
             chunk.metadata["chunk_index"] = index
 
         return chunks
-        # return self.text_splitter.split_documents(documents)
 
-    def process(self, file_path: str):
+    def process(
+        self,
+        file_path: str,
+        document_id: int | None = None,
+    ):
         """
-        Load a PDF and split it into chunks.
+        Load a PDF, split it into chunks, and attach
+        application-level metadata.
         """
 
         documents = self.load_pdf(file_path)
 
         chunks = self.split_documents(documents)
+
+        for chunk in chunks:
+            if document_id is not None:
+                chunk.metadata["document_id"] = document_id
 
         return chunks
