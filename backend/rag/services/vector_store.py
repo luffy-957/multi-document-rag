@@ -30,9 +30,6 @@ class VectorStore:
     def add_documents(self, documents):
         """
         Add documents to ChromaDB using deterministic IDs.
-
-        Each chunk receives an ID based on:
-        document_id + chunk_index.
         """
 
         if not documents:
@@ -71,14 +68,50 @@ class VectorStore:
             ids=ids,
         )
 
+    def delete_document(self, document_id: int):
+        """
+        Delete every vector belonging to a Django document.
+        """
+
+        self.vector_store.delete(
+            where={
+                "document_id": document_id
+            }
+        )
+
     def similarity_search(
         self,
         query: str,
         k: int = 4,
+        document_ids: list[int] | None = None,
     ):
         """
-        Return the most relevant chunks for a query.
+        Return the most relevant chunks.
+
+        If document_ids is provided, retrieval is restricted
+        to those documents.
         """
+
+        if document_ids:
+            if len(document_ids) == 1:
+                filter_condition = {
+                    "document_id": document_ids[0]
+                }
+            else:
+                filter_condition = {
+                    "$or": [
+                        {
+                            "document_id": document_id
+                        }
+                        for document_id in document_ids
+                    ]
+                }
+
+            return self.vector_store.similarity_search(
+                query,
+                k=k,
+                filter=filter_condition,
+            )
 
         return self.vector_store.similarity_search(
             query,
