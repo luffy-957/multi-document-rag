@@ -1,5 +1,8 @@
 function Sidebar({
+  conversations,
+  activeConversationId,
   onNewChat,
+  onSelectConversation,
 }) {
   return (
     <aside
@@ -63,9 +66,49 @@ function Sidebar({
             Conversations
           </p>
 
-          <p className="px-2 py-3 text-xs text-zinc-600">
-            Your conversations will appear here.
-          </p>
+          {conversations.length === 0 ? (
+            <p className="px-2 py-3 text-xs text-zinc-600">
+              No conversations yet.
+            </p>
+          ) : (
+            <div className="space-y-1">
+              {conversations.map(
+                (conversation) => {
+                  const isActive =
+                    conversation.id ===
+                    activeConversationId
+
+                  return (
+                    <button
+                      key={conversation.id}
+                      onClick={() =>
+                        onSelectConversation(
+                          conversation.id,
+                        )
+                      }
+                      className={`
+                        w-full
+                        truncate
+                        rounded-lg
+                        px-3
+                        py-2
+                        text-left
+                        text-sm
+                        transition
+                        ${
+                          isActive
+                            ? "bg-zinc-800 text-zinc-100"
+                            : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-200"
+                        }
+                      `}
+                    >
+                      {conversation.title}
+                    </button>
+                  )
+                },
+              )}
+            </div>
+          )}
         </div>
 
         {/* Footer */}
