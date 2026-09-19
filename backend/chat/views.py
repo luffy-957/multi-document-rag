@@ -8,6 +8,7 @@ from .models import Conversation, Message
 from .serializers import (
     ChatRequestSerializer,
     ConversationSerializer,
+    ConversationListSerializer,
 )
 
 
@@ -158,6 +159,25 @@ class ChatView(APIView):
             status=status.HTTP_200_OK,
         )
 
+
+class ConversationListView(APIView):
+
+    def get(self, request):
+        conversations = (
+            Conversation.objects
+            .all()
+            .order_by("-updated_at")
+        )
+
+        serializer = ConversationListSerializer(
+            conversations,
+            many=True,
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
+        )
 
 class ConversationDetailView(APIView):
 

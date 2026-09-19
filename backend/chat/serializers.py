@@ -2,7 +2,17 @@ from rest_framework import serializers
 
 from .models import Conversation, Message
 
-
+class ConversationListSerializer(
+    serializers.ModelSerializer
+):
+    class Meta:
+        model = Conversation
+        fields = (
+            "id",
+            "title",
+            "created_at",
+            "updated_at",
+        )
 class ChatRequestSerializer(serializers.Serializer):
     question = serializers.CharField(
         max_length=5000,
