@@ -193,19 +193,24 @@ function App() {
                 >
                   Upload your documents and ask
                   questions about their contents
-                  using retrieval-augmented generation.
+                  using retrieval-augmented
+                  generation.
                 </p>
               </div>
             )}
 
-            {messages.map((message) => (
-              <ChatMessage
-                key={message.id}
-                role={message.role}
-                content={message.content}
-                sources={message.sources}
-              />
-            ))}
+            {messages.map(
+              (message) => (
+                <ChatMessage
+                  key={message.id}
+                  role={message.role}
+                  content={message.content}
+                  sources={
+                    message.sources
+                  }
+                />
+              ),
+            )}
 
             {/* Loading */}
             {isLoading && (
