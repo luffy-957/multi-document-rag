@@ -12,7 +12,12 @@ from .serializers import (
 
 
 class ChatView(APIView):
+
     def post(self, request):
+        # --------------------------------------------------
+        # Validate request
+        # --------------------------------------------------
+
         serializer = ChatRequestSerializer(
             data=request.data
         )
@@ -49,6 +54,7 @@ class ChatView(APIView):
                 conversation = Conversation.objects.get(
                     id=conversation_id
                 )
+
             except Conversation.DoesNotExist:
                 return Response(
                     {
@@ -109,13 +115,16 @@ class ChatView(APIView):
             sources=result["sources"],
         )
 
-        # Touch conversation updated_at
+        # --------------------------------------------------
+        # Update conversation timestamp
+        # --------------------------------------------------
+
         conversation.save(
             update_fields=["updated_at"]
         )
 
         # --------------------------------------------------
-        # Return API response
+        # Return response
         # --------------------------------------------------
 
         return Response(
@@ -130,12 +139,11 @@ class ChatView(APIView):
 
 
 class ConversationDetailView(APIView):
+
     def get(self, request, conversation_id):
         try:
-            conversation = (
-                Conversation.objects.get(
-                    id=conversation_id
-                )
+            conversation = Conversation.objects.get(
+                id=conversation_id
             )
 
         except Conversation.DoesNotExist:
