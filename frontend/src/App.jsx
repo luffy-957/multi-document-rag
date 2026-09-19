@@ -1,15 +1,22 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import ChatHeader from "./components/ChatHeader"
 import ChatInput from "./components/ChatInput"
 import ChatMessage from "./components/ChatMessage"
 import Sidebar from "./components/Sidebar"
 
-import { sendChatMessage } from "./services/api"
+import {
+  getConversation,
+  getConversations,
+  sendChatMessage,
+} from "./services/api"
 
 
 function App() {
   const [messages, setMessages] = useState([])
+
+  const [conversations, setConversations] =
+    useState([])
 
   const [conversationId, setConversationId] =
     useState(null)
@@ -17,8 +24,45 @@ function App() {
   const [isLoading, setIsLoading] =
     useState(false)
 
+  const [isLoadingConversations, setIsLoadingConversations] =
+    useState(true)
+
   const [error, setError] = useState(null)
 
+
+  // --------------------------------------------------
+  // Load conversations when app starts
+  // --------------------------------------------------
+
+  useEffect(() => {
+    loadConversations()
+  }, [])
+
+
+  async function loadConversations() {
+    try {
+      setIsLoadingConversations(true)
+
+      const data =
+        await getConversations()
+
+      setConversations(data)
+    } catch (error) {
+      console.error(error)
+
+      setError(
+        error.message ||
+          "Failed to load conversations.",
+      )
+    } finally {
+      setIsLoadingConversations(false)
+    }
+  }
+
+
+  // --------------------------------------------------
+  // Send message
+  // --------------------------------------------------
 
   async function handleSend(question) {
     if (isLoading) {
