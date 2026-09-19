@@ -123,6 +123,10 @@ function App() {
   }
 
 
+  // --------------------------------------------------
+  // Create new chat
+  // --------------------------------------------------
+
   function handleNewChat() {
     setMessages([])
     setConversationId(null)
@@ -130,26 +134,109 @@ function App() {
   }
 
 
+  // --------------------------------------------------
+  // Load an existing conversation
+  // --------------------------------------------------
+
+  async function handleSelectConversation(
+    id,
+  ) {
+    if (isLoading) {
+      return
+    }
+
+    setError(null)
+    setIsLoading(true)
+
+    try {
+      const conversation =
+        await getConversation(id)
+
+      setConversationId(
+        conversation.id,
+      )
+
+      setMessages(
+        conversation.messages.map(
+          (message) => ({
+            id: message.id,
+            role: message.role,
+            content: message.content,
+            sources:
+              message.sources || [],
+          }),
+        ),
+      )
+
+    } catch (error) {
+      console.error(error)
+
+      setError(
+        error.message ||
+          "Failed to load conversation.",
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+
+  // --------------------------------------------------
+  // Current conversation title
+  // --------------------------------------------------
+
+  const activeConversation =
+    conversations.find(
+      (conversation) =>
+        conversation.id ===
+        conversationId,
+    )
+
+  const conversationTitle =
+    activeConversation?.title ||
+    "New Conversation"
+
+
+  // --------------------------------------------------
+  // Render
+  // --------------------------------------------------
+
   return (
     <div className="flex h-screen bg-zinc-950 text-zinc-100">
 
       <Sidebar
+        conversations={conversations}
+        activeConversationId={
+          conversationId
+        }
         onNewChat={handleNewChat}
+        onSelectConversation={
+          handleSelectConversation
+        }
       />
 
       <main className="flex min-w-0 flex-1 flex-col">
 
         <ChatHeader
           conversationTitle={
-            conversationId
-              ? "Conversation"
-              : "New Conversation"
+            conversationTitle
           }
         />
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto flex max-w-3xl flex-col gap-5 px-6 py-8">
+
+          <div
+            className="
+              mx-auto
+              flex
+              max-w-3xl
+              flex-col
+              gap-5
+              px-6
+              py-8
+            "
+          >
 
             {messages.length === 0 && (
               <div
@@ -253,7 +340,10 @@ function App() {
 
         <ChatInput
           onSend={handleSend}
-          disabled={isLoading}
+          disabled={
+            isLoading ||
+            isLoadingConversations
+          }
         />
 
       </main>
