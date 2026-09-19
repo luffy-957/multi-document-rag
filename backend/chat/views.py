@@ -71,14 +71,34 @@ class ChatView(APIView):
             )
 
         # --------------------------------------------------
-        # Save user message
+        # Save current user message
         # --------------------------------------------------
 
-        Message.objects.create(
+        user_message = Message.objects.create(
             conversation=conversation,
             role=Message.Role.USER,
             content=question,
         )
+
+        # --------------------------------------------------
+        # Build previous conversation history
+        # --------------------------------------------------
+
+        previous_messages = (
+            conversation.messages
+            .exclude(
+                id=user_message.id
+            )
+            .order_by("created_at")
+        )
+
+        history = [
+            {
+                "role": message.role,
+                "content": message.content,
+            }
+            for message in previous_messages
+        ]
 
         # --------------------------------------------------
         # Run RAG
@@ -91,6 +111,7 @@ class ChatView(APIView):
                 question=question,
                 k=k,
                 document_ids=document_ids,
+                history=history,
             )
 
         except Exception as exc:
