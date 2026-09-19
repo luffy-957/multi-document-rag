@@ -11,6 +11,11 @@ urlpatterns = [
         "api/documents/",
         include("documents.urls"),
     ),
+
+    path(
+        "api/chat/",
+        include("chat.urls"),
+    ),
 ]
 
 
