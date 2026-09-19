@@ -212,3 +212,19 @@ ANSWER
             "answer": answer,
             "sources": sources,
         }
+
+    def build_history(self, messages):
+        if not messages:
+            return ""
+
+        history_parts = []
+
+        for message in messages:
+            role = message.get("role", "user").upper()
+            content = message.get("content", "")
+
+            history_parts.append(
+                f"{role}: {content}"
+            )
+
+        return "\n".join(history_parts)
