@@ -1,6 +1,6 @@
 from .llm_service import LLMService
 from .vector_store import VectorStore
-
+from pathlib import Path
 
 class RAGService:
     """
@@ -139,27 +139,72 @@ ANSWER
             prompt
         )
 
+        # sources = []
+
+        # for document in documents:
+        #     sources.append(
+        #         {
+        #             "source": document.metadata.get(
+        #                 "source"
+        #             ),
+        #             "page": (
+        #                 document.metadata.get(
+        #                     "page",
+        #                     0,
+        #                 )
+        #                 + 1
+        #             ),
+        #             "chunk_index": document.metadata.get(
+        #                 "chunk_index"
+        #             ),
+        #             "document_id": document.metadata.get(
+        #                 "document_id"
+        #             ),
+        #         }
+        #     )
+
         sources = []
 
+        seen_sources = set()
+
         for document in documents:
+            document_id = document.metadata.get(
+                "document_id"
+            )
+
+            source = document.metadata.get(
+                "source",
+                "Unknown source",
+            )
+
+            filename = Path(source).name
+
+            page = (
+                document.metadata.get("page", 0)
+                + 1
+            )
+
+            chunk_index = document.metadata.get(
+                "chunk_index"
+            )
+
+            source_key = (
+                document_id,
+                filename,
+                page,
+            )
+
+            if source_key in seen_sources:
+                continue
+            
+            seen_sources.add(source_key)
+
             sources.append(
                 {
-                    "source": document.metadata.get(
-                        "source"
-                    ),
-                    "page": (
-                        document.metadata.get(
-                            "page",
-                            0,
-                        )
-                        + 1
-                    ),
-                    "chunk_index": document.metadata.get(
-                        "chunk_index"
-                    ),
-                    "document_id": document.metadata.get(
-                        "document_id"
-                    ),
+                    "document_id": document_id,
+                    "document": filename,
+                    "page": page,
+                    "chunk_index": chunk_index,
                 }
             )
 
