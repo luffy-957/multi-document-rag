@@ -78,24 +78,30 @@ function App() {
       sources: [],
     }
 
-    setMessages((currentMessages) => [
-      ...currentMessages,
-      userMessage,
-    ])
+    setMessages(
+      (currentMessages) => [
+        ...currentMessages,
+        userMessage,
+      ],
+    )
 
     setIsLoading(true)
 
     try {
-      const result = await sendChatMessage({
-        question,
-        conversationId,
-        documentIds: [],
-        k: 4,
-      })
+      const result =
+        await sendChatMessage({
+          question,
+          conversationId,
+          documentIds: [],
+          k: 4,
+        })
+
+      const newConversationId =
+        result.conversation_id
 
       if (!conversationId) {
         setConversationId(
-          result.conversation_id,
+          newConversationId,
         )
       }
 
@@ -103,13 +109,20 @@ function App() {
         id: result.message_id,
         role: "assistant",
         content: result.answer,
-        sources: result.sources || [],
+        sources:
+          result.sources || [],
       }
 
-      setMessages((currentMessages) => [
-        ...currentMessages,
-        assistantMessage,
-      ])
+      setMessages(
+        (currentMessages) => [
+          ...currentMessages,
+          assistantMessage,
+        ],
+      )
+
+      // Refresh sidebar
+      await loadConversations()
+
     } catch (error) {
       console.error(error)
 
