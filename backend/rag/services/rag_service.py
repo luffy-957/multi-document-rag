@@ -67,45 +67,82 @@ Content:
         self,
         question: str,
         context: str,
+        history: str = "",
     ):
         """
         Build the prompt given to the LLM.
         """
-
         return f"""
 You are a document question-answering assistant.
 
 Answer the user's question using ONLY the
-information provided in the context below.
+information provided in the document context.
 
 Rules:
 
 1. Do not use outside knowledge.
 2. Do not invent facts.
-3. If the answer cannot be found in the context,
-   clearly say that the information is not available
-   in the provided documents.
-4. Give a concise and useful answer.
-5. When appropriate, mention which source or page
-   supports the answer.
+3. If the answer cannot be found in the
+   provided documents, clearly say that the
+   information is not available in the documents.
+4. Use conversation history only to understand
+   references and context.
+5. The document context is the authoritative
+   source for factual answers.
+6. Give a concise and useful answer.
+7. When appropriate, mention the relevant
+   source and page.
 
-CONTEXT
-=======
+CONVERSATION HISTORY
+====================
+{history}
+
+DOCUMENT CONTEXT
+================
 {context}
 
-QUESTION
-========
+CURRENT QUESTION
+================
 {question}
 
 ANSWER
 ======
 """
+#         return f"""
+# You are a document question-answering assistant.
+
+# Answer the user's question using ONLY the
+# information provided in the context below.
+
+# Rules:
+
+# 1. Do not use outside knowledge.
+# 2. Do not invent facts.
+# 3. If the answer cannot be found in the context,
+#    clearly say that the information is not available
+#    in the provided documents.
+# 4. Give a concise and useful answer.
+# 5. When appropriate, mention which source or page
+#    supports the answer.
+
+# CONTEXT
+# =======
+# {context}
+
+# QUESTION
+# ========
+# {question}
+
+# ANSWER
+# ======
+# """
 
     def ask(
         self,
         question: str,
         k: int = 4,
         document_ids: list[int] | None = None,
+        history: list[dict] | None = None,
     ):
         """
         Retrieve relevant documents and generate an answer.
@@ -130,9 +167,14 @@ ANSWER
             documents
         )
 
+        history_text = self.build_history(
+            history or []
+        )   
+
         prompt = self.build_prompt(
             question=question,
             context=context,
+            history=history_text,
         )
 
         answer = self.llm_service.generate(
